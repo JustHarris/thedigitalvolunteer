@@ -1,4 +1,6 @@
-import { INTEGER, STRING, ENUM, FLOAT, Op, literal } from 'sequelize';
+import {
+  INTEGER, STRING, ENUM, FLOAT, Op, literal,
+} from 'sequelize';
 import User from './User';
 import database from '../../config/database';
 
@@ -24,21 +26,21 @@ const HelpRequest = database.define('HelpRequest', {
   id: {
     type: INTEGER,
     autoIncrement: true,
-    primaryKey: true
+    primaryKey: true,
   },
   fromUser: {
-    type: INTEGER,    
+    type: INTEGER,
   },
   assignedUser: {
-    type: INTEGER, 
-    allowNull: true   
+    type: INTEGER,
+    allowNull: true,
   },
   description: {
     type: STRING(4096),
   },
   priority: {
-    type: INTEGER,    
-    defaultValue: 1
+    type: INTEGER,
+    defaultValue: 1,
   },
   status: {
     // Created=0, Assigned&Accepted=1, Done=2
@@ -46,28 +48,28 @@ const HelpRequest = database.define('HelpRequest', {
     defaultValue: 0,
     validate: {
       min: 0,
-      max: 2
-    }
+      max: 2,
+    },
   },
   locationLatitude: {
-    type: FLOAT(9, 6),    
+    type: FLOAT(9, 6),
   },
   locationLongitude: {
-    type: FLOAT(9, 6),    
+    type: FLOAT(9, 6),
   },
-  helpType: {    
-    type: ENUM(HELP_TYPE_SHOP, HELP_TYPE_TRANSPORT, HELP_TYPE_MEDICINE, HELP_TYPE_OTHER),        
+  helpType: {
+    type: ENUM(HELP_TYPE_SHOP, HELP_TYPE_TRANSPORT, HELP_TYPE_MEDICINE, HELP_TYPE_OTHER),
   },
-  timeOptions: {    
+  timeOptions: {
     // pipe-separeted list of time-ranges: 10:00-11:00|12:00-13:00|19:00-20:00|20:00-21:00
     type: STRING(4096),
   },
-  deliveryOption: {    
+  deliveryOption: {
     type: ENUM(DELIVERY_DOOR, DELIVERY_PORCH, DELIVERY_DRONE),
   },
-  paymentOption: {    
-    type: ENUM(DELIVERY_CASH, DELIVERY_CARD, DELIVERY_SWISH),            
-  }
+  paymentOption: {
+    type: ENUM(DELIVERY_CASH, DELIVERY_CARD, DELIVERY_SWISH),
+  },
 }, { tableName });
 
 
@@ -76,49 +78,49 @@ HelpRequest.parseHelpRequest = function(helpRequestData) {
   if (helpRequestData.location) {
     helpRequestData.locationLatitude = helpRequestData.location.latitude;
     helpRequestData.locationLongitude = helpRequestData.location.longitude;
-    delete helpRequestData.location;      
-  } 
-  if (helpRequestData.timeOptions && typeof helpRequestData.timeOptions == "object") {
-    helpRequestData.timeOptions = helpRequestData.timeOptions.join("|");
+    delete helpRequestData.location;
   }
-  return helpRequestData; 
-}
+  if (helpRequestData.timeOptions && typeof helpRequestData.timeOptions === 'object') {
+    helpRequestData.timeOptions = helpRequestData.timeOptions.join('|');
+  }
+  return helpRequestData;
+};
 
 // eslint-disable-next-line
 HelpRequest.searchForInNeed = async function(latitude, longitude, authUser) {
-  const radius = 5000; // 5km  
-  let skillToHelpType = {};
+  const radius = 5000; // 5km
+  const skillToHelpType = {};
   skillToHelpType[User.SKILL_SHOPPER] = HELP_TYPE_SHOP;
   skillToHelpType[User.SKILL_DRIVER] = HELP_TYPE_TRANSPORT;
   skillToHelpType[User.SKILL_PICKER] = HELP_TYPE_MEDICINE;
-  skillToHelpType[User.SKILL_SHOPPER] = HELP_TYPE_OTHER;    
+  skillToHelpType[User.SKILL_SHOPPER] = HELP_TYPE_OTHER;
   const helpTypes = [];
-  for (var item of authUser.get("skills").split("|")) {    
+  for (const item of authUser.get('skills').split('|')) {
     if (skillToHelpType[item]) {
       helpTypes.push(skillToHelpType[item]);
-    }    
-  }           
-  try {        
-    const helpRequests = await HelpRequest.findAll({    
+    }
+  }
+  try {
+    const helpRequests = await HelpRequest.findAll({
       attributes: {
         include: [
-          [literal(`ST_Distance_Sphere(point(${longitude}, ${latitude}),point(locationLongitude, locationLatitude))`), 'distance']
-        ]
+          [literal(`ST_Distance_Sphere(point(${longitude}, ${latitude}),point(locationLongitude, locationLatitude))`), 'distance'],
+        ],
       },
-      where: { assignedUser: null, status: REQUEST_STATUS_INIT, helpType: helpTypes} ,
-      having: { distance: {[Op.lt]: radius}}
+      where: { assignedUser: null, status: REQUEST_STATUS_INIT, helpType: helpTypes },
+      having: { distance: { [Op.lt]: radius } },
     });
-  
-    return helpRequests; 
+
+    return helpRequests;
   } catch (err) {
     console.log(err);
     return [];
   }
-}
+};
 
 // eslint-disable-next-line
 HelpRequest.prototype.toJSON = async function() {    
-  const values = Object.assign({}, this.get());  
+  const values = { ...this.get() };
 
   if (values.fromUser) {
     const fromUser = await User.scope('helpRequest').findOne({
@@ -135,7 +137,7 @@ HelpRequest.prototype.toJSON = async function() {
     values.assignedUser = output;
   }
   if (values.timeOptions) {
-    values.timeOptions = values.timeOptions.split("|");
+    values.timeOptions = values.timeOptions.split('|');
   }
   if (values.locationLatitude) {
     values.location = {
@@ -144,7 +146,7 @@ HelpRequest.prototype.toJSON = async function() {
     };
     delete values.locationLatitude;
     delete values.locationLongitude;
-  }  
+  }
 
   HelpRequest.REQUEST_STATUS_INIT = REQUEST_STATUS_INIT;
   HelpRequest.REQUEST_STATUS_ACCEPTED = REQUEST_STATUS_ACCEPTED;

@@ -8,30 +8,30 @@ const UserRating = database.define('UserRating', {
   id: {
     type: INTEGER,
     autoIncrement: true,
-    primaryKey: true
+    primaryKey: true,
   },
   fromUser: {
-    type: INTEGER,    
+    type: INTEGER,
   },
   toUser: {
-    type: INTEGER,    
+    type: INTEGER,
   },
   value: {
     type: INTEGER,
     validate: {
       min: 0,
-      max: 10
-    }
+      max: 10,
+    },
   },
   comment: {
-    type: STRING(2048),    
-    allowNull: true
+    type: STRING(2048),
+    allowNull: true,
   },
 }, { tableName });
 
 // eslint-disable-next-line
 UserRating.prototype.toJSON = async function() {    
-  const values = Object.assign({}, this.get());  
+  const values = { ...this.get() };
   if (values.fromUser) {
     const fromUser = await User.scope('lite').findOne({
       where: { id: values.fromUser },

@@ -52,7 +52,7 @@ const dbService = (environment, migrate) => {
       return errorDBStart(err);
     }
   };
-  
+
   const startProd = async () => {
     try {
       await authenticateDB();

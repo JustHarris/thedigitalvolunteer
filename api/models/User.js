@@ -1,4 +1,6 @@
-import { INTEGER, STRING, FLOAT, ENUM, Op, literal } from 'sequelize';
+import {
+  INTEGER, STRING, FLOAT, ENUM, Op, literal,
+} from 'sequelize';
 import bcryptService from '../services/bcrypt.service';
 import database from '../../config/database';
 import UserRating from './UserRating';
@@ -6,7 +8,7 @@ import HelpRequest from './HelpRequest';
 
 const hooks = {
   beforeCreate(user) {
-    user.password = bcryptService().password(user); // eslint-disable-line no-param-reassign    
+    user.password = bcryptService().password(user); // eslint-disable-line no-param-reassign
   },
   beforeUpdate(user) {
   },
@@ -28,21 +30,21 @@ const User = database.define('User', {
   id: {
     type: INTEGER,
     autoIncrement: true,
-    primaryKey: true
+    primaryKey: true,
   },
   firstName: {
-    type: STRING,    
+    type: STRING,
   },
   lastName: {
-    type: STRING,    
+    type: STRING,
   },
   email: {
-    type: STRING,        
-    unique: true
+    type: STRING,
+    unique: true,
   },
   bankId: {
-    type: STRING,    
-    unique: true
+    type: STRING,
+    unique: true,
   },
   password: {
     type: STRING,
@@ -51,71 +53,71 @@ const User = database.define('User', {
     type: STRING,
   },
   about: {
-    type: STRING(2048),        
-    allowNull: true
+    type: STRING(2048),
+    allowNull: true,
   },
   avatar: {
-    type: STRING(1024),        
-    allowNull: true
+    type: STRING(1024),
+    allowNull: true,
   },
   token: {
     type: STRING(1024),
-    allowNull: true
+    allowNull: true,
   },
   status: {
     type: INTEGER,
-    defaultValue: 0,    
+    defaultValue: 0,
     validate: {
       min: -1,
-      max: 1
-    }
+      max: 1,
+    },
   },
   role: {
     type: ENUM('inneed', 'helper', 'admin'),
     defaultValue: 'helper',
   },
   locationLatitude: {
-    type: FLOAT(9, 6),    
+    type: FLOAT(9, 6),
   },
   locationLongitude: {
-    type: FLOAT(9, 6),    
+    type: FLOAT(9, 6),
   },
   addressStreet: {
-    type: STRING(512),        
+    type: STRING(512),
   },
   addressPostalCode: {
-    type: STRING,        
+    type: STRING,
   },
   addressCity: {
-    type: STRING,        
+    type: STRING,
   },
   skills: {
     // pipe-separeted list of skills: driver|picker|shopper|walker|artist|inmune
-    type: STRING(1024),        
+    type: STRING(1024),
   },
 }, {
   defaultScope: {
-    attributes: { },    
+    attributes: { },
   },
   scopes: {
     lite: {
-      attributes: { 
+      attributes: {
         exclude: [
-        'bankId', 'email', 'password', 'locationLatitude', 'locationLongitude', 'createdAt', 'updatedAt', 
-        'token', 'addressStreet', 'addressCity', 'addressPostalCode', 'status', 'role', 'phone', 'skills'
-        ]
+          'bankId', 'email', 'password', 'locationLatitude', 'locationLongitude', 'createdAt', 'updatedAt',
+          'token', 'addressStreet', 'addressCity', 'addressPostalCode', 'status', 'role', 'phone', 'skills',
+        ],
       },
     },
     helpRequest: {
-      attributes: { 
+      attributes: {
         exclude: [
-        'bankId', 'email', 'password', 'locationLatitude', 'locationLongitude', 'createdAt', 'updatedAt','token', 'status', 'role', 'skills'
-        ]
+          'bankId', 'email', 'password', 'locationLatitude', 'locationLongitude', 'createdAt', 'updatedAt', 'token', 'status', 'role', 'skills',
+        ],
       },
-    }
+    },
   },
-  hooks, 
-  tableName 
+  hooks,
+  tableName,
 });
 
 
@@ -126,44 +128,44 @@ User.parseUser = function(userData) {
     userData.addressPostalCode = userData.address.postalCode;
     userData.addressCity = userData.address.city;
     delete userData.address;
-  }  
+  }
   if (userData.location) {
     userData.locationLatitude = userData.location.latitude;
     userData.locationLongitude = userData.location.longitude;
-    delete userData.location;      
-  } 
-  if (userData.skills && typeof userData.skills == "object") {
-    userData.skills = userData.skills.join("|");
+    delete userData.location;
   }
-  return userData; 
-}
+  if (userData.skills && typeof userData.skills === 'object') {
+    userData.skills = userData.skills.join('|');
+  }
+  return userData;
+};
 
 // eslint-disable-next-line
 User.searchForHelpers = async function(latitude, longitude, helpType) {
-  const radius = 5000; // 5km  
-  let helpTypeToSkill = {}
+  const radius = 5000; // 5km
+  const helpTypeToSkill = {};
   helpTypeToSkill[HelpRequest.HELP_TYPE_SHOP] = SKILL_SHOPPER;
   helpTypeToSkill[HelpRequest.HELP_TYPE_TRANSPORT] = SKILL_DRIVER;
   helpTypeToSkill[HelpRequest.HELP_TYPE_MEDICINE] = SKILL_PICKER;
-  helpTypeToSkill[HelpRequest.HELP_TYPE_OTHER] = SKILL_SHOPPER;  
+  helpTypeToSkill[HelpRequest.HELP_TYPE_OTHER] = SKILL_SHOPPER;
   console.log(helpTypeToSkill);
-  try {        
-    const users = await User.scope("helpRequest").findAll({    
+  try {
+    const users = await User.scope('helpRequest').findAll({
       attributes: {
         include: [
-          [literal(`ST_Distance_Sphere(point(${longitude}, ${latitude}),point(locationLongitude, locationLatitude))`), 'distance']
-        ]
+          [literal(`ST_Distance_Sphere(point(${longitude}, ${latitude}),point(locationLongitude, locationLatitude))`), 'distance'],
+        ],
       },
-      where: { role: User.ROLE_HELPER, skills: {[Op.like]: `%${helpTypeToSkill[helpType]}%`}} ,
-      having: { distance: {[Op.lt]: radius}}
+      where: { role: User.ROLE_HELPER, skills: { [Op.like]: `%${helpTypeToSkill[helpType]}%` } },
+      having: { distance: { [Op.lt]: radius } },
     });
-  
-    return users; 
+
+    return users;
   } catch (err) {
     console.log(err);
     return [];
   }
-}
+};
 
 // eslint-disable-next-line
 User.prototype.getRating = async function(userId) {
@@ -175,20 +177,20 @@ User.prototype.getRating = async function(userId) {
       return 0;
     }
     let average = 0;
-    for (var rating of ratingsList) {
-      average += parseInt(rating.value);      
+    for (const rating of ratingsList) {
+      average += parseInt(rating.value);
     }
-    return average / (ratingsList.length);    
+    return average / (ratingsList.length);
   };
   return {
     total: ratings.length,
     average: average(ratings),
-  }
+  };
 };
 
 // eslint-disable-next-line
 User.prototype.toJSON = async function () {
-  const values = Object.assign({}, this.get());
+  const values = { ...this.get() };
 
   if (values.addressStreet) {
     values.address = {
@@ -197,7 +199,7 @@ User.prototype.toJSON = async function () {
       city: values.addressCity,
     };
     delete values.addressStreet;
-    delete values.addressPostalCode;    
+    delete values.addressPostalCode;
     delete values.addressCity;
   }
   if (values.locationLatitude) {
@@ -207,11 +209,11 @@ User.prototype.toJSON = async function () {
     };
     delete values.locationLatitude;
     delete values.locationLongitude;
-  }  
-  if (values.skills) {
-    values.skills = values.skills.split("|");
   }
-  values.rating = await this.getRating(values.id);    
+  if (values.skills) {
+    values.skills = values.skills.split('|');
+  }
+  values.rating = await this.getRating(values.id);
 
   return values;
 };

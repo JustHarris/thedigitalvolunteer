@@ -15,6 +15,6 @@ const production = {
 };
 
 export default {
-  development,  
+  development,
   production,
 };

@@ -8,32 +8,32 @@ const Message = database.define('Message', {
   id: {
     type: INTEGER,
     autoIncrement: true,
-    primaryKey: true
+    primaryKey: true,
   },
   fromUser: {
-    type: INTEGER,    
+    type: INTEGER,
   },
   toUser: {
-    type: INTEGER,    
+    type: INTEGER,
   },
   helpRequest: {
-    type: INTEGER,    
-    allowNull: true
+    type: INTEGER,
+    allowNull: true,
   },
   title: {
-    type: STRING(1024),    
-    allowNull: true
+    type: STRING(1024),
+    allowNull: true,
   },
   content: {
-    type: STRING(4096),    
-    allowNull: true
+    type: STRING(4096),
+    allowNull: true,
   },
 }, { tableName });
 
 
 // eslint-disable-next-line
 Message.prototype.toJSON = async function() {    
-  const values = Object.assign({}, this.get());  
+  const values = { ...this.get() };
   if (values.fromUser) {
     const fromUser = await User.scope('lite').findOne({
       where: { id: values.fromUser },

@@ -18,7 +18,7 @@ switch (process.env.NODE_ENV) {
         },
       },
     );
-  break;
+    break;
   default:
     database = new Sequelize(
       connection.development.database,
@@ -32,7 +32,7 @@ switch (process.env.NODE_ENV) {
           idle: 10000,
         },
       },
-    );    
+    );
 }
 
 export default database;

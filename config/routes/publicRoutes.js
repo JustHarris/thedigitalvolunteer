@@ -5,92 +5,92 @@ const routes = {
   'POST /user/auth': 'UserController.auth',
   'GET /user/:id/logout': {
     path: 'UserController.logout',
-    middlewares: [ auth ],
+    middlewares: [auth],
   },
   'GET /user/:id': {
     path: 'UserController.get',
-    middlewares: [ auth ],
+    middlewares: [auth],
   },
   'PUT /user/:id': {
     path: 'UserController.update',
-    middlewares: [ auth ],
+    middlewares: [auth],
   },
   'DELETE /user/:id': {
     path: 'UserController.remove',
-    middlewares: [ auth ],
+    middlewares: [auth],
   },
 
   'POST /rating': {
     path: 'UserRatingController.register',
-    middlewares: [ auth ],
+    middlewares: [auth],
   },
   'GET /user/:id/ratings/received': {
     path: 'UserRatingController.received',
-    middlewares: [ auth ],
+    middlewares: [auth],
   },
   'GET /user/:id/ratings/created': {
     path: 'UserRatingController.created',
-    middlewares: [ auth ],
+    middlewares: [auth],
   },
 
   'POST /message': {
     path: 'MessageController.register',
-    middlewares: [ auth ],
+    middlewares: [auth],
   },
   'GET /message/:id': {
     path: 'MessageController.get',
-    middlewares: [ auth ],
+    middlewares: [auth],
   },
   'DELETE /message/:id': {
     path: 'MessageController.remove',
-    middlewares: [ auth ],
+    middlewares: [auth],
   },
   'GET /user/:id/messages/sent': {
     path: 'MessageController.sent',
-    middlewares: [ auth ],
+    middlewares: [auth],
   },
   'GET /user/:id/messages/received': {
     path: 'MessageController.received',
-    middlewares: [ auth ],
+    middlewares: [auth],
   },
-  
+
   'POST /help-request': {
     path: 'HelpRequestController.register',
-    middlewares: [ auth ],
+    middlewares: [auth],
   },
   'POST /help-request/search/inneed': {
     path: 'HelpRequestController.searchInNeed',
-    middlewares: [ auth ],
-  },  
+    middlewares: [auth],
+  },
   'POST /help-request/:id/search/helper': {
     path: 'HelpRequestController.searchHelper',
-    middlewares: [ auth ],
-  },  
+    middlewares: [auth],
+  },
   'GET /help-request/:id': {
     path: 'HelpRequestController.get',
-    middlewares: [ auth ],
+    middlewares: [auth],
   },
   'PUT /help-request/:id': {
     path: 'HelpRequestController.update',
-    middlewares: [ auth ],
+    middlewares: [auth],
   },
   'DELETE /help-request/:id': {
     path: 'HelpRequestController.remove',
-    middlewares: [ auth ],
+    middlewares: [auth],
   },
   'POST /help-request/:id/assign': {
     path: 'HelpRequestController.assign',
-    middlewares: [ auth ],
+    middlewares: [auth],
   },
   'POST /help-request/:id/accept': {
     path: 'HelpRequestController.assignAccept',
-    middlewares: [ auth ],
+    middlewares: [auth],
   },
   'POST /help-request/:id/done': {
     path: 'HelpRequestController.markDone',
-    middlewares: [ auth ],
+    middlewares: [auth],
   },
-  
+
 };
 
 export default routes;

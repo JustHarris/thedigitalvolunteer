@@ -2,7 +2,7 @@
   "name": "thedigitalvolunteer-api",
   "version": "1.0.0",
   "author": "Ivan Ugarte <ivan.ugarte.castro@gmail.com>",
-  "license": "MIT",  
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/JustHarris/thedigitalvolunteer.git"
@@ -11,14 +11,14 @@
   "bugs": {
     "url": "https://github.com/JustHarris/thedigitalvolunteer/issues"
   },
-  "scripts": {    
-    "start": "yarn nodemon",    
+  "scripts": {
+    "start": "yarn nodemon",
     "dev": "cross-env NODE_ENV=development babel-node ./api/api.js",
     "nodemon": "nodemon --exec yarn run dev",
-    "lint": "eslint ./api/. ./config/. ./test/.",
+    "lint": "eslint ./api/. ./config/.",
     "prepush": "yarn test",
     "pretest": "yarn lint",
-    "build": "babel -d ./dist ./src -s",    
+    "build": "babel -d ./dist ./src -s",
     "production": "cross-env NODE_ENV=production node ./dist/index.js",
     "test": "jest --coverage --forceExit"
   },
@@ -51,9 +51,9 @@
     "@babel/plugin-proposal-throw-expressions": "7.0.0",
     "@babel/preset-env": "7.1.5",
     "cross-env": "^5.1.4",
-    "eslint": "^4.19.1",
-    "eslint-config-airbnb-base": "^12.1.0",
-    "eslint-plugin-import": "^2.11.0",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.1.0",
+    "eslint-plugin-import": "^2.20.2",
     "husky": "^0.14.3",
     "jest": "^24.8.0",
     "nodemon": "^1.17.3",

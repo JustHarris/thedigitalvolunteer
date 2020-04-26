@@ -11,7 +11,7 @@ import cors from 'cors';
 /**
  * server configuration
  */
-import config from '../config/';
+import config from '../config';
 import dbService from './services/db.service';
 
 // environment: development, staging, testing, production
@@ -44,9 +44,9 @@ app.use(json());
 app.use('/', mappedRoutes);
 
 server.listen(config.port, () => {
-  if (environment !== 'production' &&
-    environment !== 'development' &&
-    environment !== 'testing'
+  if (environment !== 'production'
+    && environment !== 'development'
+    && environment !== 'testing'
   ) {
     console.error(`NODE_ENV is set to ${environment}, but only production and development are valid.`);
     process.exit(1);
