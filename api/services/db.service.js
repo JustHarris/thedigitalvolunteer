@@ -1,4 +1,4 @@
-const database = require('../../config/database');
+import database from '../../config/database';
 
 const dbService = (environment, migrate) => {
   const authenticateDB = () => database.authenticate();
@@ -52,30 +52,7 @@ const dbService = (environment, migrate) => {
       return errorDBStart(err);
     }
   };
-
-  const startStage = async () => {
-    try {
-      await authenticateDB();
-
-      if (migrate) {
-        return startMigrateTrue();
-      }
-
-      return startMigrateFalse();
-    } catch (err) {
-      return errorDBStart(err);
-    }
-  };
-
-  const startTest = async () => {
-    try {
-      await authenticateDB();
-      await startMigrateFalse();
-    } catch (err) {
-      errorDBStart(err);
-    }
-  };
-
+  
   const startProd = async () => {
     try {
       await authenticateDB();
@@ -90,17 +67,11 @@ const dbService = (environment, migrate) => {
       case 'development':
         await startDev();
         break;
-      case 'staging':
-        await startStage();
-        break;
-      case 'testing':
-        await startTest();
-        break;
       case 'production':
         await startProd();
         break;
       default:
-        await wrongEnvironment();
+        wrongEnvironment();
     }
   };
 
@@ -109,4 +80,4 @@ const dbService = (environment, migrate) => {
   };
 };
 
-module.exports = dbService;
+export default dbService;

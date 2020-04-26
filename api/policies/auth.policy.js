@@ -1,34 +1,23 @@
-const JWTService = require('../services/auth.service');
+import User from '../models/User';
 
-// usually: "Authorization: Bearer [token]" or "token: [token]"
-module.exports = (req, res, next) => {
+export default async (req, res, next) => {
+  // usually: "X-Auth-Token: [token]"
   let tokenToVerify;
-
-  if (req.header('Authorization')) {
-    const parts = req.header('Authorization').split(' ');
-
-    if (parts.length === 2) {
-      const scheme = parts[0];
-      const credentials = parts[1];
-
-      if (/^Bearer$/.test(scheme)) {
-        tokenToVerify = credentials;
-      } else {
-        return res.status(401).json({ msg: 'Format for Authorization: Bearer [token]' });
-      }
-    } else {
-      return res.status(401).json({ msg: 'Format for Authorization: Bearer [token]' });
-    }
+  if (req.header('X-Auth-Token')) {    
+    tokenToVerify = req.header('X-Auth-Token');
   } else if (req.body.token) {
     tokenToVerify = req.body.token;
     delete req.query.token;
   } else {
-    return res.status(401).json({ msg: 'No Authorization was found' });
+    return res.status(401).json({ msg: 'No X-Auth-Token was found' });
   }
 
-  return JWTService().verify(tokenToVerify, (err, thisToken) => {
-    if (err) return res.status(401).json({ err });
-    req.token = thisToken;
-    return next();
+  const user = await User.findOne({ 
+    where: { token: tokenToVerify } 
   });
+  if (!user) {
+    return res.status(401).json({ msg: 'Auth failed' });
+  }
+  req.authUser = user;
+  return next();
 };

@@ -1,30 +1,26 @@
 {
-  "name": "express-rest-api-boilerplate",
-  "version": "0.0.0",
-  "author": "Lukas Aichbauer <l.aichbauer@gmail.com>",
-  "license": "MIT",
+  "name": "thedigitalvolunteer-api",
+  "version": "1.0.0",
+  "author": "Ivan Ugarte <ivan.ugarte.castro@gmail.com>",
+  "license": "MIT",  
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aichbauer/express-rest-api-boilerplate.git"
+    "url": "git+https://github.com/JustHarris/thedigitalvolunteer.git"
   },
-  "homepage": "https://github.com/aichbauer/express-rest-api-boilerplate#readme",
+  "homepage": "https://github.com/JustHarris/thedigitalvolunteer#readme",
   "bugs": {
-    "url": "https://github.com/aichbauer/express-rest-api-boilerplate/issues"
+    "url": "https://github.com/JustHarris/thedigitalvolunteer/issues"
   },
-  "scripts": {
-    "prestart": "npm run drop-sqlite-db || true",
-    "start": "npm run nodemon",
-    "poststart": "npm run create-sqlite-db",
-    "dev": "cross-env NODE_ENV=development node ./api/api.js",
-    "nodemon": "nodemon --exec npm run dev",
-    "create-sqlite-db": "shx touch ./db/database.sqlite",
-    "drop-sqlite-db": "shx rm ./db/database.sqlite",
+  "scripts": {    
+    "start": "yarn nodemon",    
+    "dev": "cross-env NODE_ENV=development babel-node ./api/api.js",
+    "nodemon": "nodemon --exec yarn run dev",
     "lint": "eslint ./api/. ./config/. ./test/.",
-    "prepush": "npm test",
-    "pretest": "npm run lint",
-    "production": "cross-env NODE_ENV=production node ./api/api.js",
-    "test": "npm run create-sqlite-db; cross-env NODE_ENV=testing jest --coverage; npm run drop-sqlite-db",
-    "test-ci": "jest --coverage --forceExit"
+    "prepush": "yarn test",
+    "pretest": "yarn lint",
+    "build": "babel -d ./dist ./src -s",    
+    "production": "cross-env NODE_ENV=production node ./dist/index.js",
+    "test": "jest --coverage --forceExit"
   },
   "jest": {
     "globals": {
@@ -44,10 +40,16 @@
     "express-routes-mapper": "^1.0.2",
     "helmet": "^3.12.0",
     "jsonwebtoken": "^8.2.1",
-    "sequelize": "^6.0.0",
-    "sqlite3": "^4.0.0"
+    "sequelize": "^5.21.7",
+    "sqlite3": "^4.0.0",
+    "mysql2": "^2.1.0"
   },
   "devDependencies": {
+    "@babel/cli": "7.1.5",
+    "@babel/core": "7.1.5",
+    "@babel/node": "7.0.0",
+    "@babel/plugin-proposal-throw-expressions": "7.0.0",
+    "@babel/preset-env": "7.1.5",
     "cross-env": "^5.1.4",
     "eslint": "^4.19.1",
     "eslint-config-airbnb-base": "^12.1.0",

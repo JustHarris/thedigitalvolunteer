@@ -1,90 +1,139 @@
-const User = require('../models/User');
-const authService = require('../services/auth.service');
-const bcryptService = require('../services/bcrypt.service');
+import User from '../models/User';
+import authService from '../services/auth.service';
+import bcryptService from '../services/bcrypt.service';
 
 const UserController = () => {
   const register = async (req, res) => {
-    const { body } = req;
-
-    if (body.password === body.password2) {
-      try {
-        const user = await User.create({
-          email: body.email,
-          password: body.password,
-        });
-        const token = authService().issue({ id: user.id });
-
-        return res.status(200).json({ token, user });
-      } catch (err) {
-        console.log(err);
-        return res.status(500).json({ msg: 'Internal server error' });
-      }
-    }
-
-    return res.status(400).json({ msg: 'Bad Request: Passwords don\'t match' });
+    const { body } = req;  
+    try {
+      body.token = authService(body.id);            
+      const user = await User.create(User.parseUser(body));                  
+      const output = await user.toJSON();
+      return res.status(200).json(output);
+    } catch (err) {            
+      return res.status(500).json({ msg: 'Could not create user' });
+    }    
   };
 
-  const login = async (req, res) => {
-    const { email, password } = req.body;
-
+  const auth = async (req, res) => {
+    const { email, bankId, password } = req.body;      
+    let user;
     if (email && password) {
       try {
-        const user = await User
-          .findOne({
-            where: {
-              email,
-            },
-          });
-
-        if (!user) {
-          return res.status(400).json({ msg: 'Bad Request: User not found' });
-        }
-
-        if (bcryptService().comparePassword(password, user.password)) {
-          const token = authService().issue({ id: user.id });
-
-          return res.status(200).json({ token, user });
-        }
-
-        return res.status(401).json({ msg: 'Unauthorized' });
-      } catch (err) {
-        console.log(err);
+        user = await User.findOne({
+            where: { email: email },
+          });     
+      } catch (err) {                 
         return res.status(500).json({ msg: 'Internal server error' });
       }
+    } else if (bankId && password) {
+      try {
+        user = await User.findOne({
+          where: { bankId: bankId },
+        });
+      } catch (err) {        
+        return res.status(500).json({ msg: 'Internal server error' });
+      }
+    } else {
+      return res.status(401).json({ msg: 'Unauthorized' });
+    }     
+    if (!user) {
+      return res.status(404).json({ msg: 'Bad Request: User not found' });
+    }
+    if (bcryptService().comparePassword(password, user.password)) {
+      user.token = authService(user.id);
+      await user.save();
+      const output = await user.toJSON();
+      return res.status(200).json(output);
     }
 
-    return res.status(400).json({ msg: 'Bad Request: Email or password is wrong' });
+    return res.status(401).json({ msg: 'Unauthorized' });
   };
 
-  const validate = (req, res) => {
-    const { token } = req.body;
-
-    authService().verify(token, (err) => {
-      if (err) {
-        return res.status(401).json({ isvalid: false, err: 'Invalid Token!' });
-      }
-
-      return res.status(200).json({ isvalid: true });
-    });
-  };
-
-  const getAll = async (req, res) => {
+  const logout = async (req, res) => {
+    const id = req.params.id;
     try {
-      const users = await User.findAll();
-
-      return res.status(200).json({ users });
+      const updated = await User.update({ token: null }, { where: { id: id } });
+      if (updated) {
+        const user = await User.findOne({ 
+          where: { id: id } 
+        });       
+        const output = await user.toJSON();            
+        return res.status(200).json(output);
+      }
+      return res.status(404).json({ msg: 'Bad Request: User not found' });
     } catch (err) {
       console.log(err);
       return res.status(500).json({ msg: 'Internal server error' });
     }
   };
 
+  const get = async (req, res) => {
+    const id = req.params.id;
+    try {
+      const user = await User.findOne({ 
+        where: { id: id } 
+      });
+      if (!user) {
+        return res.status(404).json({ msg: 'Bad Request: User not found' });
+      }
+      const output = await user.toJSON();
+      return res.status(200).json(output);
+    } catch (err) {
+      return res.status(500).json({ msg: 'Internal server error' });
+    }
+  };
+
+  const remove = async (req, res) => {
+    const id = req.params.id;
+    const body = req.body;
+    if (body.onlyDisable) {
+      const user = await User.update({ status: -1 }, { where: { id: id } });
+      if (!user) {
+        return res.status(404).json({ msg: 'Bad Request: User not found' });
+      }
+    } else {      
+      const user = await User.findOne({ 
+        where: { id: id } 
+      });
+      if (!user) {
+        return res.status(404).json({ msg: 'Bad Request: User not found' });
+      }
+      await user.destroy();      
+    }
+
+    return res.status(200).json({id: id});
+  };
+
+  const update = async (req, res) => {
+    const id = req.params.id;
+    const body = req.body;
+    try {      
+      if (body.password) {
+        body.password = bcryptService().password(body);
+      }
+      const updated = await User.update(User.parseUser(body), { where: { id: id } });
+      if (updated) {
+        const user = await User.findOne({ 
+          where: { id: id } 
+        });       
+        const output = await user.toJSON();            
+        return res.status(200).json(output);
+      }
+      return res.status(404).json({ msg: 'Bad Request: User not found' });      
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({ msg: 'Internal server error' });
+    }
+  };
 
   return {
     register,
-    login,
-    validate,
-    getAll,
+    auth,
+    logout,
+    get,
+    update,
+    remove,
   };
 };
 

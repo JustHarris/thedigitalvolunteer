@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  api:
+    image: custom-node
+    build: .
+    ports:
+      - "8080:8080"      
+    volumes:      
+      - .:/usr/local/src/api-code/
+    networks:
+      - backend
+    depends_on: 
+      - api-db
+
+  api-db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: VCW-NCfz-6wpi.TvTPyUuf!q.T6J@WPqGrxk3teb*rcurYQqTk
+      MYSQL_DATABASE: thedigitalvolunteer
+      MYSQL_USER: thedigitalvolunteer
+      MYSQL_PASSWORD: ZqXrvu8Gi2TUC6H9FLr-wLHYhZ_WUxeGjLuH*tBjVKzbJjTKGy
+    volumes:
+        - db-data:/var/lib/mysql         
+    networks:
+      - backend        
+        
+networks:
+  backend:        
+
+volumes:
+  db-data:

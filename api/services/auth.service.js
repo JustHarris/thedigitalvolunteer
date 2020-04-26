@@ -1,15 +1,10 @@
-const jwt = require('jsonwebtoken');
+import bcryptService from '../services/bcrypt.service';
 
-const secret = process.env.NODE_ENV === 'production' ? process.env.JWT_SECRET : 'secret';
+const secret = process.env.NODE_ENV === 'production' ? 'averylongsecret12323277242349021823129301239213823djksfjfkdsfjsdfsdf' : 'secret';
 
-const authService = () => {
-  const issue = (payload) => jwt.sign(payload, secret, { expiresIn: 10800 });
-  const verify = (token, cb) => jwt.verify(token, secret, {}, cb);
-
-  return {
-    issue,
-    verify,
-  };
+const authService = (id) => {
+  const token = Math.floor(Date.now() / 1000) + "" + secret + "" + id;
+  return bcryptService().hash(token);
 };
 
-module.exports = authService;
+export default authService;
